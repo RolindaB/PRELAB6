@@ -4,7 +4,6 @@
  * Created: 19/04/2024 07:12:41
  * Author : asrol
  */ 
-#define F_CPU 16000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -32,18 +31,15 @@ ISR(USART_RX_vect) {
 	// Recibe el carácter desde UART y lo guarda en bufferRX
 	bufferRX = UDR0;
 
-	// Dividir el carácter recibido en dos partes
-	uint8_t lower_bits = bufferRX & 0b00111111; // Los 6 bits menos significativos
-	uint8_t upper_bits = (bufferRX >> 6) & 0b11; // Los 2 bits más significativos
+	// Mostrar los primeros 6 bits en PORTB
+	PORTB = bufferRX & 0b00111111; // Utiliza una máscara para obtener los 6 bits menos significativos
 
-	// Mostrar los 6 bits menos significativos en PORTB
-	PORTB = lower_bits;
+	// Mostrar los bits 7 y 8 en PD2 y PD3 de PORTD
+	uint8_t upper_bits = (bufferRX >> 6) & 0b11; // Obtiene los bits 7 y 8
+	PORTD = (PORTD & ~0b00001100) | (upper_bits << 2); // Limpia y establece los bits PD2 y PD3
 
-	// Mostrar los 2 bits más significativos en los pines PD2 y PD3 de PORTD
-	PORTD = (PORTD & ~0b00001100) | (upper_bits << 2);
-
-	// Añade un retraso para mantener las LEDs encendidas
-	_delay_ms(500);
+	// Opcionalmente, puedes ajustar el retraso para que las LEDs permanezcan encendidas durante un tiempo específico
+	_delay_ms(1000); // Ajusta el tiempo de retraso según sea necesario
 
 	// Opcionalmente, apaga las LEDs después del retraso
 	PORTB = 0; // Apaga todas las LEDs en PORTB
@@ -61,8 +57,8 @@ int main(void) {
 	initUart();
 
 	// Configurar PORTB y PORTD como puertos de salida
-	DDRB = 0x3F; // Configura PB0-PB5 como salidas (6 pines)
-	DDRD |= 0b00001100; // Configura PD2 y PD3 como salidas (2 pines)
+	DDRB = 0x3F; // PB0-PB5 como salidas (6 pines)
+	DDRD |= 0b00001100; // PD2 y PD3 como salidas (2 pines)
 
 	// Bucle infinito
 	while (1) {

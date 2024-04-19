@@ -3,31 +3,31 @@ prelab6.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000001ce  2**0
+  0 .data         00000000  00800100  00800100  000001d4  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000015a  00000000  00000000  00000074  2**1
+  1 .text         00000160  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000001  00800100  00800100  000001ce  2**0
+  2 .bss          00000001  00800100  00800100  000001d4  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000001ce  2**0
+  3 .comment      00000030  00000000  00000000  000001d4  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000200  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000204  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000038  00000000  00000000  00000240  2**0
+  5 .debug_aranges 00000038  00000000  00000000  00000244  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000007b2  00000000  00000000  00000278  2**0
+  6 .debug_info   000007a3  00000000  00000000  0000027c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000006e8  00000000  00000000  00000a2a  2**0
+  7 .debug_abbrev 000006e8  00000000  00000000  00000a1f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000002e1  00000000  00000000  00001112  2**0
+  8 .debug_line   000002db  00000000  00000000  00001107  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  0000009c  00000000  00000000  000013f4  2**2
+  9 .debug_frame  0000009c  00000000  00000000  000013e4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000003da  00000000  00000000  00001490  2**0
+ 10 .debug_str    000003cf  00000000  00000000  00001480  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000145  00000000  00000000  0000186a  2**0
+ 11 .debug_loc    00000159  00000000  00000000  0000184f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000028  00000000  00000000  000019af  2**0
+ 12 .debug_ranges 00000028  00000000  00000000  000019a8  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -81,8 +81,8 @@ Disassembly of section .text:
   7e:	a1 30       	cpi	r26, 0x01	; 1
   80:	b2 07       	cpc	r27, r18
   82:	e1 f7       	brne	.-8      	; 0x7c <.do_clear_bss_loop>
-  84:	0e 94 a2 00 	call	0x144	; 0x144 <main>
-  88:	0c 94 ab 00 	jmp	0x156	; 0x156 <_exit>
+  84:	0e 94 a5 00 	call	0x14a	; 0x14a <main>
+  88:	0c 94 ae 00 	jmp	0x15c	; 0x15c <_exit>
 
 0000008c <__bad_interrupt>:
   8c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -147,103 +147,102 @@ ISR(USART_RX_vect) {
   da:	80 91 c6 00 	lds	r24, 0x00C6	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
   de:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 
-	// Dividir el carácter recibido en dos partes
-	uint8_t lower_bits = bufferRX & 0b00111111; // Los 6 bits menos significativos
-  e2:	98 2f       	mov	r25, r24
-  e4:	9f 73       	andi	r25, 0x3F	; 63
-	uint8_t upper_bits = (bufferRX >> 6) & 0b11; // Los 2 bits más significativos
-  e6:	82 95       	swap	r24
-  e8:	86 95       	lsr	r24
-  ea:	86 95       	lsr	r24
-  ec:	83 70       	andi	r24, 0x03	; 3
+	// Mostrar los primeros 6 bits en PORTB
+	PORTB = bufferRX & 0b00111111; // Utiliza una máscara para obtener los 6 bits menos significativos
+  e2:	8f 73       	andi	r24, 0x3F	; 63
+  e4:	85 b9       	out	0x05, r24	; 5
 
-	// Mostrar los 6 bits menos significativos en PORTB
-	PORTB = lower_bits;
-  ee:	95 b9       	out	0x05, r25	; 5
-
-	// Mostrar los 2 bits más significativos en los pines PD2 y PD3 de PORTD
-	PORTD = (PORTD & ~0b00001100) | (upper_bits << 2);
-  f0:	2b b1       	in	r18, 0x0b	; 11
-  f2:	90 e0       	ldi	r25, 0x00	; 0
-  f4:	88 0f       	add	r24, r24
-  f6:	99 1f       	adc	r25, r25
-  f8:	88 0f       	add	r24, r24
-  fa:	99 1f       	adc	r25, r25
-  fc:	92 2f       	mov	r25, r18
-  fe:	93 7f       	andi	r25, 0xF3	; 243
- 100:	89 2b       	or	r24, r25
- 102:	8b b9       	out	0x0b, r24	; 11
+	// Mostrar los bits 7 y 8 en PD2 y PD3 de PORTD
+	uint8_t upper_bits = (bufferRX >> 6) & 0b11; // Obtiene los bits 7 y 8
+  e6:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+  ea:	98 2f       	mov	r25, r24
+  ec:	92 95       	swap	r25
+  ee:	96 95       	lsr	r25
+  f0:	96 95       	lsr	r25
+  f2:	93 70       	andi	r25, 0x03	; 3
+	PORTD = (PORTD & ~0b00001100) | (upper_bits << 2); // Limpia y establece los bits PD2 y PD3
+  f4:	2b b1       	in	r18, 0x0b	; 11
+  f6:	89 2f       	mov	r24, r25
+  f8:	90 e0       	ldi	r25, 0x00	; 0
+  fa:	88 0f       	add	r24, r24
+  fc:	99 1f       	adc	r25, r25
+  fe:	88 0f       	add	r24, r24
+ 100:	99 1f       	adc	r25, r25
+ 102:	92 2f       	mov	r25, r18
+ 104:	93 7f       	andi	r25, 0xF3	; 243
+ 106:	89 2b       	or	r24, r25
+ 108:	8b b9       	out	0x0b, r24	; 11
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
- 104:	2f ef       	ldi	r18, 0xFF	; 255
- 106:	89 e6       	ldi	r24, 0x69	; 105
- 108:	98 e1       	ldi	r25, 0x18	; 24
- 10a:	21 50       	subi	r18, 0x01	; 1
- 10c:	80 40       	sbci	r24, 0x00	; 0
- 10e:	90 40       	sbci	r25, 0x00	; 0
- 110:	e1 f7       	brne	.-8      	; 0x10a <__vector_18+0x52>
- 112:	00 c0       	rjmp	.+0      	; 0x114 <__vector_18+0x5c>
- 114:	00 00       	nop
+ 10a:	2f e3       	ldi	r18, 0x3F	; 63
+ 10c:	8d e0       	ldi	r24, 0x0D	; 13
+ 10e:	93 e0       	ldi	r25, 0x03	; 3
+ 110:	21 50       	subi	r18, 0x01	; 1
+ 112:	80 40       	sbci	r24, 0x00	; 0
+ 114:	90 40       	sbci	r25, 0x00	; 0
+ 116:	e1 f7       	brne	.-8      	; 0x110 <__vector_18+0x58>
+ 118:	00 c0       	rjmp	.+0      	; 0x11a <__vector_18+0x62>
+ 11a:	00 00       	nop
 
-	// Añade un retraso para mantener las LEDs encendidas
-	_delay_ms(500);
+	// Opcionalmente, puedes ajustar el retraso para que las LEDs permanezcan encendidas durante un tiempo específico
+	_delay_ms(1000); // Ajusta el tiempo de retraso según sea necesario
 
 	// Opcionalmente, apaga las LEDs después del retraso
 	PORTB = 0; // Apaga todas las LEDs en PORTB
- 116:	15 b8       	out	0x05, r1	; 5
+ 11c:	15 b8       	out	0x05, r1	; 5
 	PORTD = 0; // Apaga las LEDs en PD2 y PD3
- 118:	1b b8       	out	0x0b, r1	; 11
+ 11e:	1b b8       	out	0x0b, r1	; 11
 
 	// Responde enviando el carácter recibido de vuelta a la computadora
 	writeUart(bufferRX);
- 11a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 11e:	0e 94 55 00 	call	0xaa	; 0xaa <writeUart>
+ 120:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 124:	0e 94 55 00 	call	0xaa	; 0xaa <writeUart>
 }
- 122:	ff 91       	pop	r31
- 124:	ef 91       	pop	r30
- 126:	bf 91       	pop	r27
- 128:	af 91       	pop	r26
- 12a:	9f 91       	pop	r25
- 12c:	8f 91       	pop	r24
- 12e:	7f 91       	pop	r23
- 130:	6f 91       	pop	r22
- 132:	5f 91       	pop	r21
- 134:	4f 91       	pop	r20
- 136:	3f 91       	pop	r19
- 138:	2f 91       	pop	r18
- 13a:	0f 90       	pop	r0
- 13c:	0f be       	out	0x3f, r0	; 63
- 13e:	0f 90       	pop	r0
- 140:	1f 90       	pop	r1
- 142:	18 95       	reti
+ 128:	ff 91       	pop	r31
+ 12a:	ef 91       	pop	r30
+ 12c:	bf 91       	pop	r27
+ 12e:	af 91       	pop	r26
+ 130:	9f 91       	pop	r25
+ 132:	8f 91       	pop	r24
+ 134:	7f 91       	pop	r23
+ 136:	6f 91       	pop	r22
+ 138:	5f 91       	pop	r21
+ 13a:	4f 91       	pop	r20
+ 13c:	3f 91       	pop	r19
+ 13e:	2f 91       	pop	r18
+ 140:	0f 90       	pop	r0
+ 142:	0f be       	out	0x3f, r0	; 63
+ 144:	0f 90       	pop	r0
+ 146:	1f 90       	pop	r1
+ 148:	18 95       	reti
 
-00000144 <main>:
+0000014a <main>:
 
 int main(void) {
 	// Habilitar interrupciones globales
 	sei();
- 144:	78 94       	sei
+ 14a:	78 94       	sei
 
 	// Inicializar UART
 	initUart();
- 146:	0e 94 48 00 	call	0x90	; 0x90 <initUart>
+ 14c:	0e 94 48 00 	call	0x90	; 0x90 <initUart>
 
 	// Configurar PORTB y PORTD como puertos de salida
-	DDRB = 0x3F; // Configura PB0-PB5 como salidas (6 pines)
- 14a:	8f e3       	ldi	r24, 0x3F	; 63
- 14c:	84 b9       	out	0x04, r24	; 4
-	DDRD |= 0b00001100; // Configura PD2 y PD3 como salidas (2 pines)
- 14e:	8a b1       	in	r24, 0x0a	; 10
- 150:	8c 60       	ori	r24, 0x0C	; 12
- 152:	8a b9       	out	0x0a, r24	; 10
- 154:	ff cf       	rjmp	.-2      	; 0x154 <main+0x10>
+	DDRB = 0x3F; // PB0-PB5 como salidas (6 pines)
+ 150:	8f e3       	ldi	r24, 0x3F	; 63
+ 152:	84 b9       	out	0x04, r24	; 4
+	DDRD |= 0b00001100; // PD2 y PD3 como salidas (2 pines)
+ 154:	8a b1       	in	r24, 0x0a	; 10
+ 156:	8c 60       	ori	r24, 0x0C	; 12
+ 158:	8a b9       	out	0x0a, r24	; 10
+ 15a:	ff cf       	rjmp	.-2      	; 0x15a <main+0x10>
 
-00000156 <_exit>:
- 156:	f8 94       	cli
+0000015c <_exit>:
+ 15c:	f8 94       	cli
 
-00000158 <__stop_program>:
- 158:	ff cf       	rjmp	.-2      	; 0x158 <__stop_program>
+0000015e <__stop_program>:
+ 15e:	ff cf       	rjmp	.-2      	; 0x15e <__stop_program>

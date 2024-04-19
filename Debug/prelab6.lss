@@ -13,21 +13,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000001f0  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000038  00000000  00000000  00000230  2**0
+  5 .debug_aranges 00000040  00000000  00000000  00000230  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   0000071f  00000000  00000000  00000268  2**0
+  6 .debug_info   00000768  00000000  00000000  00000270  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000680  00000000  00000000  00000987  2**0
+  7 .debug_abbrev 000006bc  00000000  00000000  000009d8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000025d  00000000  00000000  00001007  2**0
+  8 .debug_line   00000283  00000000  00000000  00001094  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  0000009c  00000000  00000000  00001264  2**2
+  9 .debug_frame  000000ac  00000000  00000000  00001318  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000384  00000000  00000000  00001300  2**0
+ 10 .debug_str    000003a0  00000000  00000000  000013c4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000111  00000000  00000000  00001684  2**0
+ 11 .debug_loc    00000111  00000000  00000000  00001764  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000028  00000000  00000000  00001795  2**0
+ 12 .debug_ranges 00000030  00000000  00000000  00001875  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -88,9 +88,9 @@ Disassembly of section .text:
   8c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000090 <initUart>:
+void cadena(char* Texto );
 void initUart(void);
 uint8_t bufferRX;
-
 void initUart(void) {
 	// Configura UART a 9600 baudios
 	UBRR0 = 103; // Configura velocidad de transmisión de 9600 baudios
@@ -177,8 +177,7 @@ ISR(USART_RX_vect) {
  10a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
  10e:	0e 94 55 00 	call	0xaa	; 0xaa <writeUart>
 	
-	// Aquí puedes decidir no hacer nada después de encender las LEDs
-	// Permitiendo que las LEDs permanezcan encendidas hasta que se reciba un nuevo carácter
+	
 }
  112:	ff 91       	pop	r31
  114:	ef 91       	pop	r30
@@ -211,10 +210,10 @@ int main(void) {
  136:	0e 94 48 00 	call	0x90	; 0x90 <initUart>
 
 	// Configurar PORTB y PORTD como puertos de salida
-	DDRB = 0x3F; // Configura PB0-PB5 como salidas (6 pines)
+	DDRB = 0x3F; //  PB0-PB5 como salidas (6 pines)
  13a:	8f e3       	ldi	r24, 0x3F	; 63
  13c:	84 b9       	out	0x04, r24	; 4
-	DDRD |= 0b00001100; // Configura PD2 y PD3 como salidas (2 pines)
+	DDRD |= 0b00001100; //  PD2 y PD3 como salidas (2 pines)
  13e:	8a b1       	in	r24, 0x0a	; 10
  140:	8c 60       	ori	r24, 0x0C	; 12
  142:	8a b9       	out	0x0a, r24	; 10

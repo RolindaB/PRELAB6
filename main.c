@@ -9,9 +9,9 @@
 #include <util/delay.h>
 
 void writeUart(char caracter);
+void cadena(char* Texto );
 void initUart(void);
 uint8_t bufferRX;
-
 void initUart(void) {
 	// Configura UART a 9600 baudios
 	UBRR0 = 103; // Configura velocidad de transmisión de 9600 baudios
@@ -40,8 +40,7 @@ ISR(USART_RX_vect) {
 	// Responde enviando el carácter recibido de vuelta a la computadora
 	writeUart(bufferRX);
 	
-	// Aquí puedes decidir no hacer nada después de encender las LEDs
-	// Permitiendo que las LEDs permanezcan encendidas hasta que se reciba un nuevo carácter
+	
 }
 
 
@@ -53,11 +52,22 @@ int main(void) {
 	initUart();
 
 	// Configurar PORTB y PORTD como puertos de salida
-	DDRB = 0x3F; // Configura PB0-PB5 como salidas (6 pines)
-	DDRD |= 0b00001100; // Configura PD2 y PD3 como salidas (2 pines)
+	DDRB = 0x3F; //  PB0-PB5 como salidas (6 pines)
+	DDRD |= 0b00001100; //  PD2 y PD3 como salidas (2 pines)
 
 	// Bucle infinito
 	while (1) {
-		// El código se ejecuta en el bucle
+		
 	}
+}
+
+void cadena(char* Texto ){
+
+for (int variableCadena = 0; Texto[variableCadena]!= '/0'; variableCadena++){
+	// Espera hasta que el registro de datos esté vacío
+	while (!(UCSR0A & (1 << UDRE0)));
+	// Envía el carácter
+	UDR0 = Texto;
+}
+	
 }

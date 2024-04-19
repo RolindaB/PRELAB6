@@ -22,7 +22,6 @@ void initUart(void) {
 void writeUart(char caracter) {
 	// Espera hasta que el registro de datos esté vacío
 	while (!(UCSR0A & (1 << UDRE0))) {}
-	
 	// Envía el carácter
 	UDR0 = caracter;
 }
@@ -38,16 +37,13 @@ ISR(USART_RX_vect) {
 	uint8_t upper_bits = (bufferRX >> 6) & 0b11; // Obtiene los bits 7 y 8
 	PORTD = (PORTD & ~0b00001100) | (upper_bits << 2); // Limpia y establece los bits PD2 y PD3
 
-	// Opcionalmente, puedes ajustar el retraso para que las LEDs permanezcan encendidas durante un tiempo específico
-	_delay_ms(1000); // Ajusta el tiempo de retraso según sea necesario
-
-	// Opcionalmente, apaga las LEDs después del retraso
-	PORTB = 0; // Apaga todas las LEDs en PORTB
-	PORTD = 0; // Apaga las LEDs en PD2 y PD3
-
 	// Responde enviando el carácter recibido de vuelta a la computadora
 	writeUart(bufferRX);
+	
+	// Aquí puedes decidir no hacer nada después de encender las LEDs
+	// Permitiendo que las LEDs permanezcan encendidas hasta que se reciba un nuevo carácter
 }
+
 
 int main(void) {
 	// Habilitar interrupciones globales
@@ -57,8 +53,8 @@ int main(void) {
 	initUart();
 
 	// Configurar PORTB y PORTD como puertos de salida
-	DDRB = 0x3F; // PB0-PB5 como salidas (6 pines)
-	DDRD |= 0b00001100; // PD2 y PD3 como salidas (2 pines)
+	DDRB = 0x3F; // Configura PB0-PB5 como salidas (6 pines)
+	DDRD |= 0b00001100; // Configura PD2 y PD3 como salidas (2 pines)
 
 	// Bucle infinito
 	while (1) {
